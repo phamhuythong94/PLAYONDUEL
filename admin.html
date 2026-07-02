@@ -84,7 +84,9 @@
         <div class="field"><label>Player name</label><input type="text" id="wPlayer"></div>
         <div class="field"><label>Game</label><input type="text" id="wGame"></div>
       </div>
-      <div class="field"><label>Screenshot / image URL (optional)</label><input type="text" id="wImg"></div>
+      <div class="field"><label>Screenshot (upload image)</label><input type="file" id="wImgFile" accept="image/*"></div>
+      <div class="field" id="wImgPreviewWrap" style="display:none;"><img id="wImgPreview" style="max-width:120px; border-radius:2px; border:1px solid var(--line);"></div>
+      <input type="hidden" id="wImg">
       <button class="btn btn-primary" id="wSave">Add win</button>
       <div class="err" id="wErr"></div>
       <div id="winsList" style="margin-top:20px;"></div>
@@ -179,12 +181,23 @@ async function loadWins(){
   `).join('') || '<p class="muted">No wins yet.</p>';
 }
 
+document.getElementById('wImgFile').onchange = () => {
+  const file = document.getElementById('wImgFile').files[0];
+  const wrap = document.getElementById('wImgPreviewWrap');
+  if(file){
+    document.getElementById('wImgPreview').src = URL.createObjectURL(file);
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+};
+
 document.getElementById('wSave').onclick = async () => {
   const casino_id = document.getElementById('wCasino').value;
   const player_name = document.getElementById('wPlayer').value.trim();
   const game = document.getElementById('wGame').value.trim();
   const amount = parseFloat(document.getElementById('wAmount').value);
-  const image_url = document.getElementById('wImg').value.trim();
+  const file = document.getElementById('wImgFile').files[0];
   const errEl = document.getElementById('wErr');
   errEl.style.display = 'none';
 
@@ -194,13 +207,23 @@ document.getElementById('wSave').onclick = async () => {
     return;
   }
 
+  let image_url = '';
+  if(file){
+    const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    const { error: upErr } = await sb.storage.from('wins').upload(path, file);
+    if(upErr){ errEl.textContent = 'Image upload failed: ' + upErr.message; errEl.style.display = 'block'; return; }
+    const { data: pub } = sb.storage.from('wins').getPublicUrl(path);
+    image_url = pub.publicUrl;
+  }
+
   const { error } = await sb.from('wins').insert({ casino_id, player_name, game, amount, image_url });
   if(error){ errEl.textContent = error.message; errEl.style.display = 'block'; return; }
 
   document.getElementById('wPlayer').value = '';
   document.getElementById('wGame').value = '';
   document.getElementById('wAmount').value = '';
-  document.getElementById('wImg').value = '';
+  document.getElementById('wImgFile').value = '';
+  document.getElementById('wImgPreviewWrap').style.display = 'none';
   loadWins();
 };
 
