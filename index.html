@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlayOnDuel — VIP Leaderboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230a0906'/%3E%3Ctext x='32' y='44' font-family='Georgia,serif' font-size='34' font-weight='700' fill='%23e8c780' text-anchor='middle'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black: #0a0906;
+    --black-2: #121009;
+    --charcoal: #1a1712;
+    --gold: #c9a15a;
+    --gold-bright: #e8c780;
+    --gold-dim: #8a7343;
+    --cream: #ece5d6;
+    --cream-dim: #b8b0a0;
+    --line: rgba(201,161,90,0.18);
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'Manrope', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201,161,90,0.10), transparent 60%),
+      var(--black);
+    color:var(--cream);
+    font-family:var(--sans);
+    min-height:100vh;
+  }
+  a{color:inherit;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px 0; border-bottom:1px solid var(--line);
+  }
+  .logo{font-family:var(--serif); font-weight:700; font-size:24px; letter-spacing:0.06em; color:var(--gold-bright);}
+  .logo span{color:var(--cream-dim); font-weight:500;}
+  .nav-cta{
+    font-weight:600; font-size:13px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--black); background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+    padding:11px 22px; border-radius:2px; text-decoration:none;
+    box-shadow:0 0 0 1px rgba(232,199,128,0.3);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px); box-shadow:0 4px 18px rgba(201,161,90,0.35);}
+
+  .hero{padding:88px 0 56px; text-align:center; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-size:12px; letter-spacing:0.22em; text-transform:uppercase;
+    color:var(--gold-dim); margin-bottom:18px; font-weight:600;
+  }
+  .eyebrow::before, .eyebrow::after{content:'—'; margin:0 10px; color:var(--gold-dim);}
+  h1{font-family:var(--serif); font-weight:700; font-size:clamp(38px,6.5vw,64px); line-height:1.05;}
+  h1 em{font-style:normal; color:var(--gold-bright);}
+  .sub{max-width:520px; margin:22px auto 34px; color:var(--cream-dim); font-size:16px; line-height:1.6;}
+  .hero-cta{
+    display:inline-block; font-weight:700; font-size:14px; letter-spacing:0.06em;
+    text-transform:uppercase; text-decoration:none; color:var(--black);
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+    padding:16px 40px; border-radius:2px; box-shadow:0 0 0 1px rgba(232,199,128,0.3);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .hero-cta:hover{transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,161,90,0.4);}
+  .hero-fine{margin-top:14px; font-size:12px; color:var(--cream-dim); opacity:0.75;}
+
+  .stats{display:flex; justify-content:center; gap:56px; margin-top:52px; flex-wrap:wrap;}
+  .stat b{display:block; font-family:var(--serif); font-size:32px; font-weight:700; color:var(--gold-bright);}
+  .stat span{display:block; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--cream-dim); margin-top:6px;}
+
+  .tabs{display:flex; gap:10px; justify-content:center; margin:40px 0 0; flex-wrap:wrap;}
+  .tab{
+    font-size:12px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;
+    padding:9px 18px; border:1px solid var(--line); border-radius:2px; cursor:pointer;
+    color:var(--cream-dim); background:transparent;
+  }
+  .tab.active{color:var(--black); background:var(--gold-bright); border-color:var(--gold-bright);}
+
+  .board{padding:56px 0 40px;}
+  .board-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:10px;}
+  .board-head h2{font-family:var(--serif); font-size:30px; font-weight:600;}
+  .board-head .tag{font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--gold-dim); border:1px solid var(--line); padding:6px 12px; border-radius:2px;}
+
+  table{width:100%; border-collapse:collapse;}
+  thead th{text-align:left; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-dim); font-weight:600; padding:0 14px 14px; border-bottom:1px solid var(--line);}
+  thead th.num, tbody td.num{text-align:right;}
+  tbody tr{border-bottom:1px solid var(--line);}
+  tbody tr:hover{background:rgba(201,161,90,0.04);}
+  tbody td{padding:18px 14px; font-size:15px; vertical-align:middle;}
+  .rank{font-family:var(--serif); font-weight:700; font-size:19px; color:var(--cream-dim); width:44px;}
+  tr.r1 .rank, tr.r2 .rank, tr.r3 .rank{color:var(--gold-bright);}
+  .player{font-weight:600; color:var(--cream);}
+  .casino-badge{font-size:11px; color:var(--gold-dim); border:1px solid var(--line); padding:2px 8px; border-radius:2px; margin-left:8px;}
+  .game{color:var(--cream-dim); font-size:13px;}
+  .amount{font-family:var(--serif); font-weight:700; font-size:19px; color:var(--gold-bright);}
+  .thumb{width:38px; height:38px; border-radius:2px; object-fit:cover; border:1px solid var(--line); vertical-align:middle; margin-right:10px;}
+  .row-player{display:flex; align-items:center;}
+  .empty-state, .error-state{text-align:center; padding:60px 20px; color:var(--cream-dim); font-size:14px; border:1px dashed var(--line); border-radius:4px;}
+  .error-state{border-color:rgba(200,90,80,0.4); color:#d18a80;}
+
+  footer{border-top:1px solid var(--line); padding:36px 0 60px; margin-top:40px; text-align:center; color:var(--cream-dim); font-size:12px; line-height:1.8;}
+  footer .warn{color:var(--gold-dim); font-weight:600; letter-spacing:0.04em;}
+  footer .admin-link{color:var(--cream-dim); opacity:0.4; text-decoration:none;}
+  footer .admin-link:hover{opacity:0.8;}
+
+  @media(max-width:640px){
+    thead th.game, tbody td.game{display:none;}
+    .stats{gap:32px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="logo">PLAY<span>ON</span>DUEL</div>
+    <a href="#" id="navCta" class="nav-cta" target="_blank" rel="noopener">Sign Up</a>
+  </nav>
+
+  <section class="hero">
+    <div class="eyebrow">PlayOnDuel · Big Win Leaderboard</div>
+    <h1>The biggest hits<br><em>of the week</em></h1>
+    <p class="sub">A running record of real big wins on Duel, tracked by PlayOnDuel. Sign up through the referral link below to join with member perks.</p>
+    <a href="#" id="heroCta" class="hero-cta" target="_blank" rel="noopener">Join now</a>
+    <div class="hero-fine">18+ · Gambling can be addictive, please play responsibly</div>
+
+    <div class="stats">
+      <div class="stat"><b id="statTotal">$0</b><span>Total tracked wins</span></div>
+      <div class="stat"><b id="statTop">$0</b><span>Biggest single win</span></div>
+      <div class="stat"><b id="statCount">0</b><span>Wins logged</span></div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+  </section>
+
+  <section class="board">
+    <div class="board-head">
+      <h2>Leaderboard</h2>
+      <div class="tag">Updated live</div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:44px;">#</th>
+          <th>Player</th>
+          <th class="game">Game</th>
+          <th class="num">Amount won</th>
+        </tr>
+      </thead>
+      <tbody id="boardBody"></tbody>
+    </table>
+    <div id="emptyState" class="empty-state" style="display:none;">No wins logged yet.</div>
+    <div id="errorState" class="error-state" style="display:none;"></div>
+  </section>
+
+  <footer>
+    <div class="warn">18+ | Play responsibly | Not intended for anyone below the legal gambling age in your jurisdiction</div>
+    <div>This is affiliate marketing content. Signing up through links on this page may earn the site owner a commission.</div>
+    <div>If you or someone you know has a problem with gambling: begambleaware.org</div>
+    <div style="margin-top:14px; color:var(--gold-dim); letter-spacing:0.06em;">PlayOnDuel</div>
+    <div style="margin-top:6px;"><a href="admin.html" class="admin-link">admin</a></div>
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allCasinos = [];
+let allWins = [];
+let activeSlug = 'all';
+
+function fmt(n){ return '$' + Number(n).toLocaleString('en-US'); }
+function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str ?? ''; return d.innerHTML; }
+
+async function load(){
+  const errorState = document.getElementById('errorState');
+  try{
+    const { data: casinos, error: cErr } = await sb
+      .from('casinos').select('*').eq('active', true).order('sort_order');
+    if(cErr) throw cErr;
+
+    const { data: wins, error: wErr } = await sb
+      .from('wins').select('*, casinos(name, slug, aff_link)').order('amount', { ascending:false }).limit(100);
+    if(wErr) throw wErr;
+
+    allCasinos = casinos || [];
+    allWins = wins || [];
+    buildTabs();
+    setActiveCasino(allCasinos[0]?.slug || 'all');
+  }catch(err){
+    errorState.style.display = 'block';
+    errorState.textContent = 'Could not load data. Check that config.js has your Supabase URL/key and the tables exist. (' + (err.message || err) + ')';
+  }
+}
+
+function buildTabs(){
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  if(allCasinos.length <= 1) return; // no tabs needed for a single casino
+  const allBtn = document.createElement('button');
+  allBtn.className = 'tab'; allBtn.textContent = 'All'; allBtn.dataset.slug = 'all';
+  tabsEl.appendChild(allBtn);
+  allCasinos.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'tab'; b.textContent = c.name; b.dataset.slug = c.slug;
+    tabsEl.appendChild(b);
+  });
+  tabsEl.querySelectorAll('.tab').forEach(b => b.onclick = () => setActiveCasino(b.dataset.slug));
+}
+
+function setActiveCasino(slug){
+  activeSlug = slug;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.slug === slug));
+
+  const casino = slug === 'all' ? allCasinos[0] : allCasinos.find(c => c.slug === slug);
+  const aff = casino?.aff_link || '#';
+  document.getElementById('navCta').href = aff;
+  document.getElementById('heroCta').href = aff;
+
+  const filtered = slug === 'all' ? allWins : allWins.filter(w => w.casinos?.slug === slug);
+  renderBoard(filtered);
+}
+
+function renderBoard(wins){
+  const body = document.getElementById('boardBody');
+  const empty = document.getElementById('emptyState');
+  body.innerHTML = '';
+
+  if(!wins.length){
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    wins.forEach((w, i) => {
+      const tr = document.createElement('tr');
+      if(i===0) tr.classList.add('r1');
+      if(i===1) tr.classList.add('r2');
+      if(i===2) tr.classList.add('r3');
+      const badge = allCasinos.length > 1 ? `<span class="casino-badge">${escapeHtml(w.casinos?.name || '')}</span>` : '';
+      tr.innerHTML = `
+        <td class="rank">${i+1}</td>
+        <td><div class="row-player">${w.image_url ? `<img class="thumb" src="${escapeHtml(w.image_url)}" onerror="this.style.display='none'">` : ''}<span class="player">${escapeHtml(w.player_name)}</span>${badge}</div></td>
+        <td class="game">${escapeHtml(w.game || '—')}</td>
+        <td class="num amount">${fmt(w.amount)}</td>
+      `;
+      body.appendChild(tr);
+    });
+  }
+
+  const total = wins.reduce((s,w)=>s+Number(w.amount||0),0);
+  const top = wins.length ? Math.max(...wins.map(w=>Number(w.amount||0))) : 0;
+  document.getElementById('statTotal').textContent = fmt(total);
+  document.getElementById('statTop').textContent = fmt(top);
+  document.getElementById('statCount').textContent = wins.length;
+}
+
+load();
+</script>
+</body>
+</html>
